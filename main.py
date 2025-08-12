@@ -119,40 +119,88 @@ def export_single(files, out_file, fmt):
 def run_gui():
     root = Tk()
     root.title("Code Exporter")
-
+    root.geometry("450x320")
+    root.resizable(False, False)
+    
+    # Center window on screen
+    root.eval('tk::PlaceWindow . center')
+    
+    # Configure colors and theme
+    bg_color = "#f0f0f0"
+    accent_color = "#3498db"  # Blue
+    text_color = "#2c3e50"    # Dark blue
+    root.configure(bg=bg_color)
+    
+    # Variables
     folder_var = StringVar()
     mode_var = StringVar(value="Single")
     fmt_var = StringVar(value="PDF")
-    beautify_var = BooleanVar(value=True)  # default on
-
+    beautify_var = BooleanVar(value=True)
+    status_var = StringVar(value="Ready to start")
+    
+    # ttk Style
+    style = ttk.Style()
+    style.theme_use("clam")
+    
+    # Configure custom styles
+    style.configure("TFrame", background=bg_color)
+    style.configure("TButton", font=("Segoe UI", 10), background=accent_color, foreground="white")
+    style.configure("AccentButton.TButton", font=("Segoe UI Bold", 11), background=accent_color)
+    style.configure("TLabel", font=("Segoe UI", 10), background=bg_color, foreground=text_color)
+    style.configure("Header.TLabel", font=("Segoe UI Bold", 14), background=bg_color, foreground=accent_color)
+    style.configure("TCheckbutton", font=("Segoe UI", 10), background=bg_color, foreground=text_color)
+    style.configure("TCombobox", font=("Segoe UI", 10))
+    style.map("TButton", background=[('active', '#2980b9')])
+    
+    # Main frame with border and shadow
+    main_frame = ttk.Frame(root, padding=20, style="TFrame")
+    main_frame.pack(fill="both", expand=True, padx=10, pady=10)
+    
+    # Functions
     def browse_folder():
         folder = filedialog.askdirectory(title="Select folder containing code files")
         if folder:
             folder_var.set(folder)
-
+            status_var.set(f"Selected folder: {Path(folder).name}")
+    
     def start_process():
         if not folder_var.get():
-            print("No folder selected.")
+            status_var.set("⚠️ Error: No folder selected")
             return
+        status_var.set("⏳ Processing files...")
+        root.update()
         process_folder(folder_var.get(), mode_var.get(), fmt_var.get(), beautify_var.get())
-        print(f"Export complete: {fmt_var.get()} in {mode_var.get()} mode.")
-
-    Label(root, text="Folder:").grid(row=0, column=0, sticky="w")
-    Button(root, text="Browse", command=browse_folder).grid(row=0, column=1, sticky="ew")
-    Label(root, textvariable=folder_var, wraplength=300).grid(row=1, column=0, columnspan=2, sticky="w")
-
-    Label(root, text="Mode:").grid(row=2, column=0, sticky="w")
-    mode_menu = ttk.Combobox(root, textvariable=mode_var, values=["Single", "Separate"], state="readonly")
-    mode_menu.grid(row=2, column=1, sticky="ew")
-
-    Label(root, text="Format:").grid(row=3, column=0, sticky="w")
-    fmt_menu = ttk.Combobox(root, textvariable=fmt_var, values=["PDF", "TXT"], state="readonly")
-    fmt_menu.grid(row=3, column=1, sticky="ew")
-
-    Checkbutton(root, text="Beautify before export", variable=beautify_var).grid(row=4, column=0, columnspan=2, sticky="w")
-
-    Button(root, text="Convert", command=start_process).grid(row=5, column=0, columnspan=2, pady=10)
-
+        status_var.set(f"✅ Export complete: {fmt_var.get()} in {mode_var.get()} mode")
+    
+    # Title
+    ttk.Label(main_frame, text="Code Exporter", style="Header.TLabel").grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 15))
+    
+    # Widgets with better spacing and alignment
+    ttk.Label(main_frame, text="Code folder:", style="TLabel").grid(row=1, column=0, sticky="w")
+    ttk.Button(main_frame, text="Browse", command=browse_folder).grid(row=1, column=1, sticky="e", padx=(10, 0))
+    
+    folder_display = ttk.Label(main_frame, textvariable=folder_var, wraplength=380)
+    folder_display.grid(row=2, column=0, columnspan=2, sticky="w", pady=(5, 15))
+    
+    ttk.Label(main_frame, text="Export mode:", style="TLabel").grid(row=3, column=0, sticky="w")
+    mode_combo = ttk.Combobox(main_frame, textvariable=mode_var, values=["Single", "Separate"], state="readonly", width=15)
+    mode_combo.grid(row=3, column=1, sticky="e", padx=(10, 0), pady=(5, 0))
+    
+    ttk.Label(main_frame, text="Output format:", style="TLabel").grid(row=4, column=0, sticky="w", pady=(15, 0))
+    fmt_combo = ttk.Combobox(main_frame, textvariable=fmt_var, values=["PDF", "TXT"], state="readonly", width=15)
+    fmt_combo.grid(row=4, column=1, sticky="e", padx=(10, 0), pady=(15, 0))
+    
+    beautify_check = ttk.Checkbutton(main_frame, text="Beautify code before export", variable=beautify_var)
+    beautify_check.grid(row=5, column=0, columnspan=2, sticky="w", pady=(15, 0))
+    
+    # Main action button with accent style
+    convert_button = ttk.Button(main_frame, text="Convert", command=start_process, style="AccentButton.TButton")
+    convert_button.grid(row=6, column=0, columnspan=2, pady=(20, 10))
+    
+    # Status bar
+    status_bar = ttk.Label(main_frame, textvariable=status_var, font=("Segoe UI", 9), foreground="#7f8c8d")
+    status_bar.grid(row=7, column=0, columnspan=2, sticky="w", pady=(5, 0))
+    
     root.mainloop()
 
 
