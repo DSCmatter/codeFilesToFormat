@@ -1,6 +1,6 @@
 # codeFilesToFormat
 
-A simple Python GUI tool to export code files from a selected folder into a single PDF or TXT file. Supports optional auto-formatting with **Black**, **clang-format**, and **Prettier** before exporting.
+A simple Python GUI tool to export code files from a selected folder into a single PDF or TXT file, so you don't have to. Supports optional auto-formatting with **Black**, **clang-format**, and **Prettier** before exporting.
 
 ## Features
 
